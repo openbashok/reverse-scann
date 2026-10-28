@@ -25,7 +25,7 @@ internet ─▶ honeypot (reverse-scann, público)
 
 | Dónde | Archivo | Qué hace |
 |---|---|---|
-| honeypot | `/usr/local/bin/wordlist-export.sh` | imprime las 4 wordlists desde el dashboard loopback |
+| honeypot | `/usr/local/bin/wordlist-export.sh` | imprime las wordlists (paths/paths-common/files/segments/uris) desde el dashboard loopback |
 | honeypot | `~/.ssh/authorized_keys` | la mirror key entra **restringida** (`command="…wordlist-export.sh",no-pty,no-*-forwarding`) → solo exporta |
 | fileserver | `~/.ssh/id_wordlist_mirror` | clave del mirror (pull al honeypot + deploy key de github) |
 | fileserver | `~/attack-vectors` | clone del repo público (remote `git@github-wordlist:…`) |
@@ -88,7 +88,8 @@ agregada** (sin identidad del sensor ni bodies) en un repo con Pages:
 ```sh
 # operativo (vía NFS, sin credenciales ni internet):
 cat /mnt/nfs/wordlists/latest.txt         # = paths-common (vistos >= 3 veces)
-ls  /mnt/nfs/wordlists/                     # paths / paths-common / files / segments
+ls  /mnt/nfs/wordlists/                     # paths / paths-common / files / segments / uris
+# uris = URI COMPLETA (path + query): preserva el payload del ataque (php://input, invokefunction, etc.)
 
 # o desde el repo público:
 curl -s https://raw.githubusercontent.com/openbashok/attack-vectors/main/wordlists/paths-common.txt
