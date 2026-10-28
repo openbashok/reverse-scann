@@ -831,19 +831,28 @@ def whitelist_delete(wid):
 
 def generate_wordlist(cur, tfw, tp, mode="paths", min_count=1, top=None,
                       strip_slash=True, decode=False):
-    """Genera el wordlist desde los paths capturados (crudos, sin query). Excluye whitelist."""
+    """Genera el wordlist desde las requests capturadas (crudas). Excluye whitelist. Modos:
+      paths    = path sin query            files = nombre de archivo
+      segments = segmentos del path        uris  = URI COMPLETA (path + query = el vector crudo,
+                                                   preserva el payload del ataque)."""
     cur.execute(
-        f"SELECT split_part(uri, '?', 1) AS path, count(*) AS n FROM requests "
+        f"SELECT uri, count(*) AS n FROM requests "
         f"WHERE uri <> '' AND {tfw} AND {_EXCL} GROUP BY 1", tp)
     rows = cur.fetchall()
     counts = Counter()
     for r in rows:
-        path, n = r["path"], r["n"]
-        if not path:
+        uri, n = r["uri"], r["n"]
+        if not uri:
             continue
+        path = uri.split("?", 1)[0]
         if decode:
+            uri = unquote(uri)
             path = unquote(path)
-        if mode == "paths":
+        if mode == "uris":
+            entry = uri.lstrip("/") if strip_slash else uri
+            if entry:
+                counts[entry] += n
+        elif mode == "paths":
             entry = path.lstrip("/") if strip_slash else path
             if entry:
                 counts[entry] += n
@@ -887,7 +896,7 @@ def wordlist_download():
     except ValueError as e:
         return jsonify(error=str(e)), 400
     mode = request.args.get("mode", "paths")
-    if mode not in ("paths", "files", "segments"):
+    if mode not in ("paths", "files", "segments", "uris"):
         mode = "paths"
     try:
         min_count = max(1, int(request.args.get("min_count", 1)))

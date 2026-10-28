@@ -36,7 +36,7 @@ ssh -o BatchMode=yes -o IdentitiesOnly=yes -i "$KEY" "$HONEYPOT" > "$TMP" 2>/dev
 
 # sanity: deben venir los 4 bloques y contenido mínimo (si el dashboard está caído, abortar
 # sin pisar los archivos buenos con vacío)
-if [ "$(grep -c "^===FILE:" "$TMP")" -ne 4 ] || [ "$(wc -l < "$TMP")" -lt 50 ]; then
+if [ "$(grep -c "^===FILE:" "$TMP")" -lt 4 ] || [ "$(wc -l < "$TMP")" -lt 50 ]; then
   echo "pull invalido (dashboard caido?), abort" >&2; exit 1
 fi
 
@@ -44,7 +44,7 @@ fi
 sanitize() { LC_ALL=C tr -d "\000-\011\013\014\016-\037" | awk "length>0 && length<=512"; }
 
 mkdir -p "$NFS"
-for name in paths paths-common files segments; do
+for name in paths paths-common files segments uris; do
   awk -v n="$name" "\$0==\"===FILE:\"n\"===\"{g=1;next} /^===FILE:/{g=0} g{print}" "$TMP" \
     | sanitize > "$REPO/wordlists/$name.txt"
   cp "$REPO/wordlists/$name.txt" "$NFS/$name.txt"
