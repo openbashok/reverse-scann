@@ -27,7 +27,10 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
   *)
     emit() { echo "===FILE:$1==="; curl -s "http://localhost:8088/api/wordlist?$2"; }
     emit paths        "range=all&mode=paths&min_count=1&strip_slash=1"
-    emit paths-common "range=all&mode=paths&min_count=3&strip_slash=1"
+    emit paths-common    "range=all&mode=paths&min_count=3&strip_slash=1"
+    emit paths-top1000   "range=all&mode=paths&min_count=1&top=1000&strip_slash=1"    # top 1000 por frecuencia (tope duro)
+    emit paths-top5000   "range=all&mode=paths&min_count=1&top=5000&strip_slash=1"    # top 5000
+    emit paths-top10000  "range=all&mode=paths&min_count=1&top=10000&strip_slash=1"   # top 10000
     emit files        "range=all&mode=files&min_count=2&strip_slash=1"
     emit segments     "range=all&mode=segments&min_count=2&strip_slash=1"
     emit uris             "range=all&mode=uris&min_count=1&strip_slash=1"           # URI completa (path+query)
