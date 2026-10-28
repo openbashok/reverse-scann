@@ -829,6 +829,35 @@ def whitelist_delete(wid):
 # Wordlist de vectores (diccionario de paths capturados) — on-demand + snapshot diario
 # --------------------------------------------------------------------------- #
 
+# Defang: el diccionario se PUBLICA (GitHub) y se PROPAGA (NFS). Los vectores crudos
+# traen infraestructura de malware viva (C2/hosts de droppers como Mozi) y comandos
+# destructivos. Antes de generar/propagar se neutralizan, preservando la firma del vector:
+#   - IP pública  -> 127.0.0.1   (no re-hospedamos/amplificamos el C2 del atacante)
+#   - rm -rf ...  -> defanged     (no distribuimos un comando destructivo ejecutable)
+_IPV4_RE = re.compile(r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b")
+# comandos destructivos (separador = espacio, '+' o %20 por url-encoding)
+_DANGER_RE = [
+    (re.compile(r"\brm(?:\+|%20|\s|/)+-[rf]{1,2}f?\b", re.I), "rm_DEFANGED"),
+]
+
+
+def _ip_to_local(m):
+    try:
+        if ipaddress.ip_address(m.group(0)).is_global:   # pública (no priv/loopback/reservada)
+            return "127.0.0.1"
+    except ValueError:
+        pass
+    return m.group(0)
+
+
+def defang(entry):
+    """Neutraliza una entrada del diccionario antes de publicarla/propagarla."""
+    entry = _IPV4_RE.sub(_ip_to_local, entry)
+    for rx, rep in _DANGER_RE:
+        entry = rx.sub(rep, entry)
+    return entry
+
+
 def generate_wordlist(cur, tfw, tp, mode="paths", min_count=1, top=None,
                       strip_slash=True, decode=False):
     """Genera el wordlist desde las requests capturadas (crudas). Excluye whitelist. Modos:
@@ -848,6 +877,8 @@ def generate_wordlist(cur, tfw, tp, mode="paths", min_count=1, top=None,
         if decode:
             uri = unquote(uri)
             path = unquote(path)
+        uri = defang(uri)    # neutraliza IPs públicas (C2) y comandos destructivos
+        path = defang(path)  # antes de que la entrada entre al diccionario
         if mode == "uris":
             entry = uri.lstrip("/") if strip_slash else uri
             if entry:
