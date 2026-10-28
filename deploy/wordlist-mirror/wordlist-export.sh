@@ -30,7 +30,9 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     emit paths-common "range=all&mode=paths&min_count=3&strip_slash=1"
     emit files        "range=all&mode=files&min_count=2&strip_slash=1"
     emit segments     "range=all&mode=segments&min_count=2&strip_slash=1"
-    emit uris         "range=all&mode=uris&min_count=1&strip_slash=1"        # URI completa (path+query)
-    emit uris-safe    "range=all&mode=uris-safe&min_count=1&strip_slash=1"   # idem pero shell-safe
+    emit uris             "range=all&mode=uris&min_count=1&strip_slash=1"           # URI completa (path+query)
+    emit uris-common      "range=all&mode=uris&min_count=3&strip_slash=1"           # idem, curado (visto >=3)
+    emit uris-safe        "range=all&mode=uris-safe&min_count=1&strip_slash=1"      # URI completa shell-safe
+    emit uris-safe-common "range=all&mode=uris-safe&min_count=3&strip_slash=1"      # idem, curado + shell-safe
     ;;
 esac

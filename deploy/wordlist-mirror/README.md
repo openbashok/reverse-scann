@@ -89,10 +89,14 @@ agregada** (sin identidad del sensor ni bodies) en un repo con Pages:
 # operativo (vía NFS, sin credenciales ni internet):
 cat /mnt/nfs/wordlists/latest.txt         # = paths-common (vistos >= 3 veces)
 ls  /mnt/nfs/wordlists/                     # paths / paths-common / files / segments / uris / uris-safe
-# uris      = URI COMPLETA (path + query): preserva el payload (php://input, invokefunction, etc.).
-#             OJO: trae metacaracteres de shell (; | $ ( ) ` ...). Tratar como input NO confiable.
-# uris-safe = idem pero shell-safe: todo metacaracter de shell/glob/espacio → '_'. Inofensivo
-#             aunque se interpole sin comillas. Pensado para consumir directo en pipelines (scannerOSCP).
+# uris             = URI COMPLETA (path + query): preserva el payload (php://input, invokefunction...).
+#                    OJO: trae metacaracteres de shell (; | $ ( ) ` ...). Input NO confiable.
+# uris-common      = idem pero CURADO (visto >=3): los vectores recurrentes, menos ruido.
+# uris-safe        = URI completa shell-safe: todo metacaracter de shell/glob/espacio → '_'.
+#                    Inofensivo aunque se interpole sin comillas (consumir directo en pipelines).
+# uris-safe-common = uris-safe + curado (>=3): el mejor para consumir en el scanner (seguro + señal alta).
+# NOTA: paths-common usa mode=paths → NO tiene el query. Los RCE que viven en el query están en
+#       uris-common / uris-safe-common.
 
 # o desde el repo público:
 curl -s https://raw.githubusercontent.com/openbashok/attack-vectors/main/wordlists/paths-common.txt
