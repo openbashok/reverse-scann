@@ -1,0 +1,15 @@
+# Datos capturados (JSONL de fallback) y certificados generados
+data/
+certs/
+
+# Overrides locales
+.env
+
+.DS_Store
+
+# Artefactos del harness/IDE
+.claude/
+
+# Python bytecode
+__pycache__/
+*.pyc
