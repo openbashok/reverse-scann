@@ -120,9 +120,11 @@ def gather(hours):
             SELECT coalesce(status::text, '?') AS k, count(*) AS n
             FROM requests WHERE ts >= %s AND {_EXCL}
             GROUP BY k ORDER BY n DESC LIMIT 8""", [start])
+        # Top paths: excluye ruido no-vector (raíz, vacío, favicon).
         d["paths"] = _fetch(cur, f"""
             SELECT coalesce(nullif(path, ''), '(vacío)') AS k, count(*) AS n
             FROM requests WHERE ts >= %s AND path IS NOT NULL AND {_EXCL}
+              AND coalesce(nullif(path, ''), '(vacío)') NOT IN ('/', '/favicon.ico', '(vacío)')
             GROUP BY k ORDER BY n DESC LIMIT 15""", [start])
         d["ips"] = _fetch(cur, f"""
             SELECT remote_addr::text AS k, count(*) AS n
