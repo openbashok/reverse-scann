@@ -44,7 +44,7 @@ fi
 sanitize() { LC_ALL=C tr -d "\000-\011\013\014\016-\037" | awk "length>0 && length<=512"; }
 
 mkdir -p "$NFS"
-for name in paths paths-common files segments uris; do
+for name in paths paths-common files segments uris uris-safe; do
   awk -v n="$name" "\$0==\"===FILE:\"n\"===\"{g=1;next} /^===FILE:/{g=0} g{print}" "$TMP" \
     | sanitize > "$REPO/wordlists/$name.txt"
   cp "$REPO/wordlists/$name.txt" "$NFS/$name.txt"

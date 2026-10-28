@@ -88,8 +88,11 @@ agregada** (sin identidad del sensor ni bodies) en un repo con Pages:
 ```sh
 # operativo (vía NFS, sin credenciales ni internet):
 cat /mnt/nfs/wordlists/latest.txt         # = paths-common (vistos >= 3 veces)
-ls  /mnt/nfs/wordlists/                     # paths / paths-common / files / segments / uris
-# uris = URI COMPLETA (path + query): preserva el payload del ataque (php://input, invokefunction, etc.)
+ls  /mnt/nfs/wordlists/                     # paths / paths-common / files / segments / uris / uris-safe
+# uris      = URI COMPLETA (path + query): preserva el payload (php://input, invokefunction, etc.).
+#             OJO: trae metacaracteres de shell (; | $ ( ) ` ...). Tratar como input NO confiable.
+# uris-safe = idem pero shell-safe: todo metacaracter de shell/glob/espacio → '_'. Inofensivo
+#             aunque se interpole sin comillas. Pensado para consumir directo en pipelines (scannerOSCP).
 
 # o desde el repo público:
 curl -s https://raw.githubusercontent.com/openbashok/attack-vectors/main/wordlists/paths-common.txt

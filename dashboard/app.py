@@ -858,6 +858,19 @@ def defang(entry):
     return entry
 
 
+# Shell-safe: reemplaza TODO lo que no sea de un allowlist seguro por '_'. Deja afuera
+# espacios, saltos de línea, y todos los metacaracteres de shell/glob
+# (;  |  &  $  ( )  `  < >  \  ' "  { }  * ?  [ ]  ~  !  #  ^ ...). El resultado es inofensivo
+# aunque se interpole SIN comillas en un shell; pierde fidelidad pero el vector sigue legible.
+# Pensado para consumir el diccionario directo en pipelines (ej. scannerOSCP) sin riesgo de
+# inyección de comandos. El allowlist (. / - _ + % = : @ ,) es seguro unquoted.
+_SHELL_UNSAFE_RE = re.compile(r"[^A-Za-z0-9./\-_+%=:@,]")
+
+
+def shell_safe(entry):
+    return _SHELL_UNSAFE_RE.sub("_", entry)
+
+
 def generate_wordlist(cur, tfw, tp, mode="paths", min_count=1, top=None,
                       strip_slash=True, decode=False):
     """Genera el wordlist desde las requests capturadas (crudas). Excluye whitelist. Modos:
@@ -881,6 +894,10 @@ def generate_wordlist(cur, tfw, tp, mode="paths", min_count=1, top=None,
         path = defang(path)  # antes de que la entrada entre al diccionario
         if mode == "uris":
             entry = uri.lstrip("/") if strip_slash else uri
+            if entry:
+                counts[entry] += n
+        elif mode == "uris-safe":
+            entry = shell_safe(uri.lstrip("/") if strip_slash else uri)
             if entry:
                 counts[entry] += n
         elif mode == "paths":
@@ -927,7 +944,7 @@ def wordlist_download():
     except ValueError as e:
         return jsonify(error=str(e)), 400
     mode = request.args.get("mode", "paths")
-    if mode not in ("paths", "files", "segments", "uris"):
+    if mode not in ("paths", "files", "segments", "uris", "uris-safe"):
         mode = "paths"
     try:
         min_count = max(1, int(request.args.get("min_count", 1)))
