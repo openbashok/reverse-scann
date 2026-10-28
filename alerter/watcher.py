@@ -40,6 +40,12 @@ DSN = (
 # 'where': uri | body | any (uri+body+headers). Case-insensitive.
 RULES = [
     ("log4shell",        "critical", "any",  r"\$\{jndi:(ldap|rmi|dns|ldaps|iiop)"),
+    ("php_wrapper_rce",  "high",     "any",  r"(allow_url_include|auto_prepend_file|php://(input|filter)|expect://|data://text)"),
+    ("phpunit_rce",      "high",     "any",  r"/eval-stdin\.php|phpunit[\w/.%-]*/Util/PHP"),
+    ("thinkphp_rce",     "high",     "any",  r"(invokefunction|/index/\\?think\\?app|s=/index/)"),
+    ("iot_dropper",      "high",     "any",  r"(/bin/busybox|chmod\s*\+?\s*777|tftp\s|wget[^;|]{0,80}(\.sh|Mozi|/tmp/)|\.(mips|mpsl|arm7?|x86|sh4)\b)"),
+    ("shellshock",       "high",     "any",  r"\(\s*\)\s*\{\s*:?;?"),
+    ("ssrf_metadata",    "high",     "any",  r"(169\.254\.169\.254|/latest/meta-data/|/computeMetadata/)"),
     ("rce_cmd_injection","high",     "any",  r"(;|\||`|\$\()\s*(cat|wget|curl|bash|sh|nc|ncat|python|perl|id|uname|whoami)\b"),
     ("rce_spring_ognl",  "high",     "any",  r"\$\{.*(getRuntime|ProcessBuilder|T\(java)"),
     ("webshell_php",     "high",     "any",  r"(eval|assert|system|passthru|shell_exec|base64_decode)\s*\("),
