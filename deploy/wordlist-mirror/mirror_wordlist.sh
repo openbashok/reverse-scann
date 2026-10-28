@@ -67,8 +67,8 @@ else
 fi
 
 cd "$REPO"
-if ! git diff --quiet; then
-  git add -A
+git add -A   # incluye archivos NUEVOS (git diff --quiet solo veía los ya trackeados)
+if ! git diff --cached --quiet; then
   git commit -q -m "update: $(date -u +%F) (auto-harvest)"
   git push -q origin main && echo "pushed $(date -u +%F)"
 else
