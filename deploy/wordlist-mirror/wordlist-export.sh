@@ -33,6 +33,11 @@ case "${SSH_ORIGINAL_COMMAND:-}" in
     emit paths-top10000  "range=all&mode=paths&min_count=1&top=10000&strip_slash=1"   # top 10000
     emit files        "range=all&mode=files&min_count=2&strip_slash=1"
     emit segments     "range=all&mode=segments&min_count=2&strip_slash=1"
+    # sensitive: paths tipo secreto/config (enriquece el sensitive_paths del scanner). Acotado top 500 por freq.
+    echo "===FILE:sensitive==="
+    curl -s "http://localhost:8088/api/wordlist?range=all&mode=paths&min_count=2&strip_slash=1" \
+      | grep -iE '\.env|\.git|\.svn|\.aws|\.ssh|\.kube|\.npmrc|htpasswd|htaccess|config|secret|credential|backup|dump|\.sql|actuator|heapdump|phpinfo|server-status|id_rsa|wp-config|\.bak|\.key|\.pem|\.ya?ml|web\.config|docker-compose' \
+      | head -500
     emit uris             "range=all&mode=uris&min_count=1&strip_slash=1"           # URI completa (path+query)
     emit uris-common      "range=all&mode=uris&min_count=3&strip_slash=1"           # idem, curado (visto >=3)
     emit uris-safe        "range=all&mode=uris-safe&min_count=1&strip_slash=1"      # URI completa shell-safe
